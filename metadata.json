@@ -1,0 +1,6 @@
+{
+  "name": "Financial Mathematics Calculator",
+  "description": "An interactive educational calculator covering Consumer Mathematics of Malaysian Secondary syllabus: Savings and Investments, Credit and Debt, Financial Planning, and Risk/Insurance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
