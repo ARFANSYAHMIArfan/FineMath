@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   Award, 
   Timer,
-  ChevronRight
+  ChevronRight,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -19,52 +20,64 @@ import SavingsCalculator from './components/SavingsCalculator';
 import CreditCalculator from './components/CreditCalculator';
 import FinancialPlanner from './components/FinancialPlanner';
 import InsuranceCalculator from './components/InsuranceCalculator';
+import TaxationCalculator from './components/TaxationCalculator';
 import PracticeQuiz from './components/PracticeQuiz';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState<'notes' | 'savings' | 'credit' | 'planner' | 'insurance' | 'quiz'>('notes');
+// Multi-language context
+import { LanguageProvider, useLanguage } from './LanguageContext';
+
+function MainAppContent() {
+  const [activeTab, setActiveTab] = useState<'notes' | 'savings' | 'credit' | 'planner' | 'insurance' | 'taxation' | 'quiz'>('notes');
+  const { lang, setLang, t } = useLanguage();
 
   // Interactive sidebar items
   const menuItems = [
     {
       id: 'notes',
-      name: 'Learning Hub',
-      desc: 'Syllabus formulas & terms summaries',
+      name: t('tabNotes', 'Learning Hub'),
+      desc: t('tabNotesDesc', 'Syllabus formulas & terms summaries'),
       icon: <BookOpen className="w-5 h-5" />,
       color: 'bg-blue-50/80 text-blue-600'
     },
     {
       id: 'savings',
-      name: 'Savings & Investments',
-      desc: 'Simple/compound growth & ROI',
+      name: t('tabSavings', 'Savings & Investments'),
+      desc: t('tabSavingsDesc', 'Simple/compound growth & ROI'),
       icon: <PiggyBank className="w-5 h-5" />,
       color: 'bg-emerald-50/80 text-emerald-600'
     },
     {
       id: 'credit',
-      name: 'Credit Card & Loans',
-      desc: 'Debt trap & loan amortization',
+      name: t('tabCredit', 'Credit Card & Loans'),
+      desc: t('tabCreditDesc', 'Debt trap & loan amortization'),
       icon: <CreditCard className="w-5 h-5" />,
       color: 'bg-amber-50/80 text-amber-600'
     },
     {
       id: 'planner',
-      name: 'SMART Cash Plan',
-      desc: 'Cash flow & goal feasibility solver',
+      name: t('tabPlanner', 'SMART Cash Plan'),
+      desc: t('tabPlannerDesc', 'Cash flow & goal feasibility solver'),
       icon: <Target className="w-5 h-5" />,
       color: 'bg-sky-50/80 text-sky-600'
     },
     {
       id: 'insurance',
-      name: 'Risk & Insurance',
-      desc: 'Life premiums & co-insurance formulas',
+      name: t('tabInsurance', 'Risk & Insurance'),
+      desc: t('tabInsuranceDesc', 'Life premiums & co-insurance formulas'),
       icon: <ShieldCheck className="w-5 h-5" />,
       color: 'bg-rose-50/80 text-rose-600'
     },
     {
+      id: 'taxation',
+      name: t('tabTaxation', 'Consumer Taxation'),
+      desc: t('tabTaxationDesc', 'Malaysian LHDN, JPJ & SST calculator'),
+      icon: <Calculator className="w-5 h-5" />,
+      color: 'bg-indigo-50/80 text-indigo-600'
+    },
+    {
       id: 'quiz',
-      name: 'SPM Practice Yard',
-      desc: 'Interactive math exam test',
+      name: t('tabQuiz', 'SPM Practice Yard'),
+      desc: t('tabQuizDesc', 'Interactive math exam test'),
       icon: <Award className="w-5 h-5" />,
       color: 'bg-violet-50/80 text-violet-600'
     }
@@ -82,17 +95,44 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base sm:text-lg font-bold font-display text-white tracking-tight">
-                  FinaMath <span className="text-blue-400">Pro</span>
+                  {t('appName', 'FinaMath Pro')} <span className="text-blue-400">Pro</span>
                 </h1>
-                <span className="text-[9px] bg-blue-500/10 border border-blue-500/30 text-blue-400 font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider">KSSM Malaysia</span>
+                <span className="text-[9px] bg-blue-500/10 border border-blue-500/30 text-blue-400 font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider">{t('kssmLabel', 'KSSM Malaysia')}</span>
               </div>
-              <p className="text-xs text-slate-400">Malaysian SPM Secondary • Form 3 Ch 3 • Form 4 Ch 10 • Form 5 Ch 3</p>
+              <p className="text-xs text-slate-400">{t('subtitle', 'Malaysian SPM Secondary • Form 3 Ch 3 • Form 4 Ch 10 • Form 5 Ch 3 & Ch 4')}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-slate-300 text-xs font-semibold self-start md:self-auto font-mono bg-slate-800 p-2 py-1.5 rounded-lg border border-slate-700/50">
-            <Timer className="w-4 h-4 text-blue-400" />
-            <span>Curriculum Mode Tracker</span>
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+            {/* Lingo Switcher Toggle */}
+            <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700/60 font-sans text-[11px] select-none items-center gap-1 shadow-inner h-9">
+              <span className="text-[10px] text-slate-500 font-bold px-1 flex items-center gap-1 uppercase tracking-wider">
+                <Globe className="w-3.5 h-3.5" /> Language:
+              </span>
+              <button
+                id="btn-lang-en"
+                onClick={() => setLang('en')}
+                className={`px-3 py-1 rounded-lg font-bold transition-all h-7 flex items-center justify-center ${
+                  lang === 'en' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                id="btn-lang-ms"
+                onClick={() => setLang('ms')}
+                className={`px-3 py-1 rounded-lg font-bold transition-all h-7 flex items-center justify-center ${
+                  lang === 'ms' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                BM
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 text-slate-300 text-xs font-semibold font-mono bg-slate-800 p-2 py-1.5 rounded-lg border border-slate-700/50 h-9">
+              <Timer className="w-4 h-4 text-blue-400" />
+              <span>{t('tracker', 'Curriculum Mode Tracker')}</span>
+            </div>
           </div>
         </div>
       </header>
@@ -102,7 +142,7 @@ export default function App() {
         {/* Navigation Sidebar */}
         <section className="lg:col-span-3 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-            <h2 className="text-[10px] font-bold tracking-widest text-slate-400 uppercase px-2 mb-2">Curriculum Sections</h2>
+            <h2 className="text-[10px] font-bold tracking-widest text-slate-400 uppercase px-2 mb-2">{t('sectionsHeader', 'Curriculum Sections')}</h2>
             <nav className="flex flex-col space-y-1">
               {menuItems.map((item) => {
                 const isActive = activeTab === item.id;
@@ -135,8 +175,8 @@ export default function App() {
 
           {/* Quick reference curriculum guidelines box */}
           <div className="p-4 bg-slate-50 border border-slate-200 text-slate-600 text-[11px] rounded-2xl leading-relaxed">
-            <span className="font-bold text-slate-800 block mb-1">📋 KPM Curriculum Guideline Match</span>
-            Designed to match mathematical formulations of consumer mathematics for Form 3 (Interest, Loans), Form 4 (SMART Budget criteria), and Form 5 (Deductible caps & Property risk premium co-sharing calculations).
+            <span className="font-bold text-slate-800 block mb-1">{t('kpmMatchTitle', '📋 KPM Curriculum Guideline Match')}</span>
+            {t('kpmMatch', 'Designed to match mathematical formulations of consumer mathematics for Form 3 (Interest, Loans), Form 4 (SMART Budget criteria), and Form 5 (Deductible caps & Property risk premium co-sharing calculations).')}
           </div>
         </section>
 
@@ -155,6 +195,7 @@ export default function App() {
               {activeTab === 'credit' && <CreditCalculator />}
               {activeTab === 'planner' && <FinancialPlanner />}
               {activeTab === 'insurance' && <InsuranceCalculator />}
+              {activeTab === 'taxation' && <TaxationCalculator />}
               {activeTab === 'quiz' && <PracticeQuiz />}
             </motion.div>
           </AnimatePresence>
@@ -172,5 +213,13 @@ export default function App() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <MainAppContent />
+    </LanguageProvider>
   );
 }

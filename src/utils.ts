@@ -16,7 +16,17 @@ import {
   PropertyInsuranceInput,
   PropertyInsuranceResult,
   MedicalInsuranceInput,
-  MedicalInsuranceResult
+  MedicalInsuranceResult,
+  IncomeTaxInput,
+  IncomeTaxResult,
+  RoadTaxInput,
+  RoadTaxResult,
+  PropertyAssessmentInput,
+  PropertyAssessmentResult,
+  QuitRentInput,
+  QuitRentResult,
+  SstInput,
+  SstResult
 } from './types';
 
 // Simple Interest I = Prt
@@ -494,5 +504,319 @@ export const SPM_QUIZ_QUESTIONS: Array<{
     ],
     correctIndex: 2,
     explanation: "A deductible is an amount that must be borne by the policyholder first before they can make a claim from the insurance company."
+  },
+  {
+    id: 11,
+    chapter: "Form 5 Chapter 4: Income Tax",
+    question: "Mr Lim has an annual salary of RM 74,000 and claims a total tax relief of RM 18,575 and a donation tax-exemption of RM 1,000. Calculate his chargeable income.",
+    options: [
+      "RM 55,425",
+      "RM 54,425",
+      "RM 73,000",
+      "RM 74,000"
+    ],
+    correctIndex: 1,
+    explanation: "Chargeable Income = Total Income - Exemption - Relief = 74,000 - 1,000 - 18,575 = RM 54,425."
+  },
+  {
+    id: 12,
+    chapter: "Form 5 Chapter 4: Road Tax",
+    question: "Encik Fauzi owns a 1800cc car in Peninsular Malaysia. The base rate is RM 200, and progressive rate is RM 0.40 per cc above 1600cc. Calculate his annual road tax.",
+    options: [
+      "RM 200.00",
+      "RM 280.00",
+      "RM 360.00",
+      "RM 240.00"
+    ],
+    correctIndex: 1,
+    explanation: "Progressive CC = 1800 - 1600 = 200 cc. Progressive tax = 200 * RM 0.40 = RM 80. Total road tax = RM 200 + RM 80 = RM 280.00."
+  },
+  {
+    id: 13,
+    chapter: "Form 5 Chapter 4: Property Assessment Tax",
+    question: "Mariani owns a house with an annual rental value of RM 6,580. If the property assessment tax rate is 5%, calculate the tax payable for EACH half-year.",
+    options: [
+      "RM 329.00",
+      "RM 164.50",
+      "RM 65.80",
+      "RM 98.70"
+    ],
+    correctIndex: 1,
+    explanation: "Annual assessment tax = 5% of RM 6,580 = RM 329. For each half-year, divided by 2 = RM 164.50."
+  },
+  {
+    id: 14,
+    chapter: "Form 5 Chapter 4: Quit Rent",
+    question: "Mr Hamid owns a house with an area of 130 square metres. If the quit rent rate is RM 0.43 per square metre, calculate his annual quit rent.",
+    options: [
+      "RM 55.90",
+      "RM 43.00",
+      "RM 130.00",
+      "RM 51.60"
+    ],
+    correctIndex: 0,
+    explanation: "Quit rent = Land Area * Rate = 130 * 0.43 = RM 55.90."
+  },
+  {
+    id: 15,
+    chapter: "Form 5 Chapter 4: Service Tax",
+    question: "Sofia rents a hotel room for RM 240 per night for 2 nights. Given the service tax rate is 6%, calculate the total service tax charged to Sofia.",
+    options: [
+      "RM 14.40",
+      "RM 28.80",
+      "RM 480.00",
+      "RM 508.80"
+    ],
+    correctIndex: 1,
+    explanation: "Total Room cost = RM 240 * 2 = RM 480. Service tax = 6% * RM 480 = RM 28.80."
   }
 ];
+
+// Form 5 Chapter 4: Consumer Mathematics: Taxation Calculations
+
+export function calculateIncomeTax(input: IncomeTaxInput): IncomeTaxResult {
+  const {
+    totalAnnualIncome,
+    taxExemptions,
+    individualRelief,
+    lifeInsuranceEPFRelief,
+    medicalInsuranceRelief,
+    parentMedicalRelief,
+    educationRelief,
+    otherReliefs,
+    zakat,
+    monthlyPCB
+  } = input;
+
+  // Max cap logic matching IRB guidelines in KSSM Form 5 Ch 4
+  const totalReliefs =
+    individualRelief +
+    Math.min(7000, lifeInsuranceEPFRelief) +
+    Math.min(3000, medicalInsuranceRelief) +
+    Math.min(8000, parentMedicalRelief) +
+    Math.min(7000, educationRelief) +
+    Math.min(2500, otherReliefs);
+
+  const chargeableIncome = Math.max(0, totalAnnualIncome - taxExemptions - totalReliefs);
+
+  let calculatedTax = 0;
+
+  // KSSM Standard Income Tax Rates Table
+  if (chargeableIncome <= 5000) {
+    calculatedTax = 0;
+  } else if (chargeableIncome <= 20000) {
+    calculatedTax = (chargeableIncome - 5000) * 0.01;
+  } else if (chargeableIncome <= 35000) {
+    calculatedTax = 150 + (chargeableIncome - 20000) * 0.03;
+  } else if (chargeableIncome <= 50000) {
+    calculatedTax = 600 + (chargeableIncome - 35000) * 0.08;
+  } else if (chargeableIncome <= 70000) {
+    calculatedTax = 1800 + (chargeableIncome - 50000) * 0.14;
+  } else if (chargeableIncome <= 100000) {
+    calculatedTax = 4600 + (chargeableIncome - 70000) * 0.21;
+  } else {
+    calculatedTax = 10900 + (chargeableIncome - 100000) * 0.24;
+  }
+
+  // Rebate of RM 400 if chargeable income <= 35000
+  const incomeEligibleRebate = chargeableIncome <= 35000 ? 400 : 0;
+  const taxRebate = incomeEligibleRebate + zakat;
+
+  const taxPayable = Math.max(0, calculatedTax - taxRebate);
+  const totalPCByear = monthlyPCB * 12;
+  const taxDifference = taxPayable - totalPCByear;
+
+  let status: IncomeTaxResult['status'] = 'exact';
+  if (taxDifference > 0) {
+    status = 'insufficient';
+  } else if (taxDifference < 0) {
+    status = 'excess';
+  }
+
+  return {
+    chargeableIncome: Number(chargeableIncome.toFixed(2)),
+    calculatedTax: Number(calculatedTax.toFixed(2)),
+    taxRebate: Number(taxRebate.toFixed(2)),
+    taxPayable: Number(taxPayable.toFixed(2)),
+    totalPCByear: Number(totalPCByear.toFixed(2)),
+    taxDifference: Number(Math.abs(taxDifference).toFixed(2)),
+    status
+  };
+}
+
+export function calculateRoadTax(input: RoadTaxInput): RoadTaxResult {
+  const { engineCapacity, vehicleType, location } = input;
+  let baseRate = 0;
+  let progressiveRatePerCc = 0;
+  let baseCcThreshold = 0;
+
+  if (vehicleType === 'car') {
+    if (location === 'peninsular') {
+      if (engineCapacity <= 1000) {
+        baseRate = 20;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1000;
+      } else if (engineCapacity <= 1200) {
+        baseRate = 55;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1200;
+      } else if (engineCapacity <= 1400) {
+        baseRate = 70;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1400;
+      } else if (engineCapacity <= 1600) {
+        baseRate = 90;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1600;
+      } else if (engineCapacity <= 1800) {
+        baseRate = 200;
+        progressiveRatePerCc = 0.40;
+        baseCcThreshold = 1600;
+      } else if (engineCapacity <= 2000) {
+        baseRate = 360;
+        progressiveRatePerCc = 0.50;
+        baseCcThreshold = 1800;
+      } else if (engineCapacity <= 2500) {
+        baseRate = 800;
+        progressiveRatePerCc = 1.00;
+        baseCcThreshold = 2000;
+      } else if (engineCapacity <= 3000) {
+        baseRate = 2130;
+        progressiveRatePerCc = 2.50;
+        baseCcThreshold = 2500;
+      } else {
+        baseRate = 4500;
+        progressiveRatePerCc = 4.50;
+        baseCcThreshold = 3000;
+      }
+    } else {
+      // Sabah Sarawak Cars
+      if (engineCapacity <= 1000) {
+        baseRate = 20;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1000;
+      } else if (engineCapacity <= 1200) {
+        baseRate = 30;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1200;
+      } else if (engineCapacity <= 1400) {
+        baseRate = 40;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1400;
+      } else if (engineCapacity <= 1650) {
+        baseRate = 50;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 1650;
+      } else if (engineCapacity <= 1800) {
+        baseRate = 100;
+        progressiveRatePerCc = 0.16;
+        baseCcThreshold = 1650;
+      } else if (engineCapacity <= 2000) {
+        baseRate = 180;
+        progressiveRatePerCc = 0.25;
+        baseCcThreshold = 1800;
+      } else if (engineCapacity <= 2500) {
+        baseRate = 300;
+        progressiveRatePerCc = 0.40;
+        baseCcThreshold = 2000;
+      } else if (engineCapacity <= 3000) {
+        baseRate = 600;
+        progressiveRatePerCc = 1.00;
+        baseCcThreshold = 2500;
+      } else {
+        baseRate = 1100;
+        progressiveRatePerCc = 1.50;
+        baseCcThreshold = 3000;
+      }
+    }
+  } else {
+    // Motorcycle
+    if (location === 'peninsular') {
+      if (engineCapacity <= 150) {
+        baseRate = 2;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 150;
+      } else if (engineCapacity <= 200) {
+        baseRate = 30;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 200;
+      } else if (engineCapacity <= 250) {
+        baseRate = 50;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 250;
+      } else {
+        baseRate = 100;
+        progressiveRatePerCc = 0.50;
+        baseCcThreshold = 250;
+      }
+    } else {
+      // Sabah Sarawak Motorcycle
+      if (engineCapacity <= 150) {
+        baseRate = 2;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 150;
+      } else if (engineCapacity <= 200) {
+        baseRate = 9;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 200;
+      } else if (engineCapacity <= 250) {
+        baseRate = 12;
+        progressiveRatePerCc = 0;
+        baseCcThreshold = 250;
+      } else {
+        baseRate = 40;
+        progressiveRatePerCc = 0.30;
+        baseCcThreshold = 250;
+      }
+    }
+  }
+
+  const excessCc = Math.max(0, engineCapacity - baseCcThreshold);
+  const progressiveTax = excessCc * progressiveRatePerCc;
+  const totalRoadTax = baseRate + progressiveTax;
+
+  return {
+    baseRate,
+    progressiveRatePerCc,
+    excessCc,
+    progressiveTax: Number(progressiveTax.toFixed(2)),
+    totalRoadTax: Number(totalRoadTax.toFixed(2))
+  };
+}
+
+export function calculatePropertyAssessment(input: PropertyAssessmentInput): PropertyAssessmentResult {
+  const { annualValue, taxRatePercent } = input;
+  const annualTax = annualValue * (taxRatePercent / 100);
+  const halfYearlyTax = annualTax / 2;
+
+  return {
+    annualTax: Number(annualTax.toFixed(2)),
+    halfYearlyTax: Number(halfYearlyTax.toFixed(2))
+  };
+}
+
+export function calculateQuitRent(input: QuitRentInput): QuitRentResult {
+  const { landArea, ratePerUnitArea } = input;
+  const totalQuitRent = landArea * ratePerUnitArea;
+
+  return {
+    totalQuitRent: Number(totalQuitRent.toFixed(2))
+  };
+}
+
+export function calculateSst(input: SstInput): SstResult {
+  const { amount, taxType } = input;
+  let taxRatePercent = 6;
+  if (taxType === 'sales5') taxRatePercent = 5;
+  if (taxType === 'sales10') taxRatePercent = 10;
+  if (taxType === 'service6') taxRatePercent = 6;
+
+  const taxCharged = amount * (taxRatePercent / 100);
+  const totalWithTax = amount + taxCharged;
+
+  return {
+    taxRatePercent,
+    taxCharged: Number(taxCharged.toFixed(2)),
+    totalWithTax: Number(totalWithTax.toFixed(2))
+  };
+}

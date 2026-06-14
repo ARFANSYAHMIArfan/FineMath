@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { SPM_QUIZ_QUESTIONS } from '../utils';
 import { BookOpen, Check, X, RotateCcw, Award, ArrowRight, HelpCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useLanguage } from '../LanguageContext';
 
 export default function PracticeQuiz() {
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [quizCompleted, setQuizCompleted] = useState<boolean>(false);
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
+  const { lang, t } = useLanguage();
 
   const totalQuestions = SPM_QUIZ_QUESTIONS.length;
   const currentQuestion = SPM_QUIZ_QUESTIONS[currentIdx];
@@ -51,12 +53,16 @@ export default function PracticeQuiz() {
       {/* LEFT SIDE ACTIVE QUESTION AREA */}
       <div className="lg:col-span-8">
         {!quizCompleted ? (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs relative">
+          <div className="bg-white p-6 rounded-2xl border border-slate-101 shadow-xs relative">
             {/* Header progress line */}
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-600">{currentQuestion.chapter}</span>
-                <h4 className="font-display font-bold text-slate-800 text-sm mt-0.5">Syllabus Practice Yard</h4>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-600">
+                  {currentQuestion.chapter}
+                </span>
+                <h4 className="font-display font-bold text-slate-800 text-sm mt-0.5">
+                  {lang === 'ms' ? "Laman Latihan Silibus" : "Syllabus Practice Yard"}
+                </h4>
               </div>
               <span className="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">
                 Q {currentIdx + 1} / {totalQuestions}
@@ -97,7 +103,7 @@ export default function PracticeQuiz() {
                     optionStyles = 'border-rose-200 bg-rose-50 text-rose-800';
                     checkIcon = <X className="w-4 h-4 text-rose-600 shrink-0" />;
                   } else {
-                    optionStyles = 'border-slate-100 bg-slate-100/20 text-slate-400 opacity-60';
+                    optionStyles = 'border-slate-101 bg-slate-100/20 text-slate-400 opacity-60';
                   }
                 }
 
@@ -126,7 +132,9 @@ export default function PracticeQuiz() {
                 <div className="flex items-start gap-2.5">
                   <HelpCircle className="w-4.5 h-4.5 text-blue-600 shrink-0 mt-0.5" />
                   <div className="text-xs text-slate-700">
-                    <strong className="text-blue-950 font-bold font-display block mb-1">Mathematical Solution Guide:</strong>
+                    <strong className="text-blue-950 font-bold font-display block mb-1">
+                      {lang === 'ms' ? "Panduan Penyelesaian Matematik:" : "Mathematical Solution Guide:"}
+                    </strong>
                     {currentQuestion.explanation}
                   </div>
                 </div>
@@ -139,9 +147,11 @@ export default function PracticeQuiz() {
                 <button
                   id="btn-quiz-next"
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-5 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-md shadow-blue-100"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-5 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-md shadow-blue-100 h-10"
                 >
-                  {currentIdx === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question'}
+                  {currentIdx === totalQuestions - 1 
+                    ? (lang === 'ms' ? 'Selesai Kuiz' : 'Finish Quiz') 
+                    : (lang === 'ms' ? 'Soalan Seterusnya' : 'Next Question')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -152,21 +162,27 @@ export default function PracticeQuiz() {
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4 animate-bounce">
               <Award className="w-8 h-8" />
             </div>
-            <h3 className="font-display font-bold text-slate-800 text-xl">Syllabus Quiz Completed!</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm">Great job working through the consumer math formulas covering Savings, investments, loans, budgets, and insurance premium policies.</p>
+            <h3 className="font-display font-bold text-slate-800 text-xl">
+              {lang === 'ms' ? "Kuiz Silibus Selesai!" : "Syllabus Quiz Completed!"}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1 max-w-sm">
+              {lang === 'ms' 
+                ? "Syabas kerana telah berjaya menyelesaikan ujian simulasi formula matematik pengguna bagi Simpanan, pelaburan, kadar faedah, pinjaman harian, SMART bajet, perlindungan insurans, dan pengiraan cukai."
+                : "Great job working through the consumer math formulas covering Savings, investments, loans, budgets, and insurance premium policies."}
+            </p>
 
             <div className="my-6">
               <div className="text-5xl font-display font-extrabold text-blue-600">{score} / {totalQuestions}</div>
               <span className="text-[10px] bg-blue-50 text-blue-700 rounded-full px-2.5 py-0.5 font-bold uppercase block mt-1 tracking-wider">
-                Score multiplier: {Math.round((score / totalQuestions) * 100)}%
+                {lang === 'ms' ? "Nilai Peratusan Skor:" : "Score multiplier:"} {Math.round((score / totalQuestions) * 100)}%
               </span>
             </div>
 
             <button
               onClick={resetQuiz}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-md"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-md h-10"
             >
-              <RotateCcw className="w-4 h-4" /> Restart Test
+              <RotateCcw className="w-4 h-4" /> {lang === 'ms' ? "Mula Semula Ujian" : "Restart Test"}
             </button>
           </div>
         )}
@@ -175,15 +191,19 @@ export default function PracticeQuiz() {
       {/* RIGHT SIDE QUIZ STATUS SUMMARY */}
       <div className="lg:col-span-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-4">
-          <h4 className="font-display font-bold text-slate-800 text-sm">Exam Tracker Card</h4>
+          <h4 className="font-display font-bold text-slate-800 text-sm">
+            {lang === 'ms' ? "Kad Penjejak Peperiksaan" : "Exam Tracker Card"}
+          </h4>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Test questions are generated dynamically to cover the exact exam metrics derived from the Malaysian Secondary textbook guidelines!
+            {lang === 'ms' 
+              ? "Soalan praktis dibina mengikut piawaian khusus soalan SPM berdasarkan buku teks utama KPM!"
+              : "Test questions are generated dynamically to cover the exact exam metrics derived from the Malaysian Secondary textbook guidelines!"}
           </p>
 
           <div className="grid grid-cols-5 gap-2 pt-2 border-t border-slate-100">
             {SPM_QUIZ_QUESTIONS.map((q, idx) => {
               const ansValue = answers[q.id];
-              let squareColor = 'bg-slate-50 text-slate-400 border-slate-100';
+              let squareColor = 'bg-slate-50 text-slate-400 border-slate-101';
               if (idx === currentIdx) {
                 squareColor = 'bg-blue-50 border-blue-500 text-blue-700 font-bold';
               } else if (ansValue !== undefined) {
@@ -211,15 +231,20 @@ export default function PracticeQuiz() {
           </div>
 
           <div className="text-[10px] border-t border-slate-100 pt-3 text-slate-400 space-y-1.5 font-sans">
-            <span className="font-bold uppercase tracking-wider block text-slate-500 mb-1">Color Guide:</span>
+            <span className="font-bold uppercase tracking-wider block text-slate-500 mb-1">
+              {lang === 'ms' ? "Panduan Warna:" : "Color Guide:"}
+            </span>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block" /> Correct Answer
+              <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block" /> 
+              {lang === 'ms' ? "Jawapan Betul" : "Correct Answer"}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block" /> Incorrect Answer
+              <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block" /> 
+              {lang === 'ms' ? "Jawapan Salah" : "Incorrect Answer"}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded bg-blue-200 inline-block" /> Active Question
+              <span className="w-2.5 h-2.5 rounded bg-blue-200 inline-block" /> 
+              {lang === 'ms' ? "Soalan Aktif" : "Active Question"}
             </div>
           </div>
         </div>

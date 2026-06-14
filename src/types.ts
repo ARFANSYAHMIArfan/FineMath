@@ -138,6 +138,74 @@ export interface MedicalInsuranceResult {
   policyholderPayment: number;
 }
 
+// Form 5 Chapter 4: Consumer Mathematics: Taxation
+export interface IncomeTaxInput {
+  totalAnnualIncome: number;
+  taxExemptions: number; // e.g. donations to approved institutions
+  individualRelief: number; // fixed standard RM 9,000 in KSSM
+  lifeInsuranceEPFRelief: number; // max RM 7,000
+  medicalInsuranceRelief: number; // max RM 3,000
+  parentMedicalRelief: number; // medical treatment for parents, max e.g. RM 8,000
+  educationRelief: number; // self-education etc., max e.g. RM 7,000
+  otherReliefs: number; // lifestyle etc., max e.g. RM 2,500
+  zakat: number; // rebate amount
+  monthlyPCB: number; // Potongan Cukai Bulanan
+}
+
+export interface IncomeTaxResult {
+  chargeableIncome: number;
+  calculatedTax: number;
+  taxRebate: number; // RM 400 if chargeableIncome <= 35000 + zakat
+  taxPayable: number;
+  totalPCByear: number;
+  taxDifference: number; // positive = paid too little (shortfall), negative = paid too much (surplus)
+  status: 'insufficient' | 'excess' | 'exact';
+}
+
+export interface RoadTaxInput {
+  engineCapacity: number; // cc
+  vehicleType: 'car' | 'motorcycle';
+  location: 'peninsular' | 'sabah_sarawak';
+}
+
+export interface RoadTaxResult {
+  baseRate: number;
+  progressiveRatePerCc: number;
+  excessCc: number;
+  progressiveTax: number;
+  totalRoadTax: number;
+}
+
+export interface PropertyAssessmentInput {
+  annualValue: number;
+  taxRatePercent: number; // e.g., 5%
+}
+
+export interface PropertyAssessmentResult {
+  annualTax: number;
+  halfYearlyTax: number;
+}
+
+export interface QuitRentInput {
+  landArea: number; // e.g., m^2
+  ratePerUnitArea: number; // e.g., RM 0.43/m^2
+}
+
+export interface QuitRentResult {
+  totalQuitRent: number;
+}
+
+export interface SstInput {
+  amount: number;
+  taxType: 'sales5' | 'sales10' | 'service6';
+}
+
+export interface SstResult {
+  taxRatePercent: number;
+  taxCharged: number;
+  totalWithTax: number;
+}
+
 export interface Question {
   id: number;
   chapter: string;
